@@ -39,10 +39,12 @@ performPCA <- function(enriched, groups) {
 #
 #' @param species The scientific name of the species of interest in 
 #' order to get correcent gene nomenclature
-#' @param library Individual libraries or multiple libraries to select, 
-#' example: library = c("H", "C5").
+#' @param library Individual collection(s) of gene sets, e.g. c("H", "C5").
+#' See \url{https://www.gsea-msigdb.org/gsea/msigdb/collections.jsp} for
+#' all MSigDB collections.
 #' @param gene.sets Select gene sets or pathways, using specific names, 
-#' example: pathways = c("HALLMARK_TNFA_SIGNALING_VIA_NFKB").
+#' example: pathways = c("HALLMARK_TNFA_SIGNALING_VIA_NFKB"). Will only be
+#' honored if library is set, too.
 #'
 #' @examples 
 #' GS <- getGeneSets(library = "H")
@@ -53,14 +55,14 @@ performPCA <- function(enriched, groups) {
 #' @importFrom msigdbr msigdbr msigdbr_species
 #' 
 #' @author Nick Borcherding, Jared Andrews
-#' @return List of GeneSets in collection format
+#' @return A \code{GeneSetCollection} object containing the requested \code{GeneSet} objects.
 getGeneSets <- function(species = "Homo sapiens", 
                         library = NULL, gene.sets = NULL) {
     spec <- msigdbr_species()
     spec_check <- unlist(spec[spec$species_name %in% species,][,1])
     if (length(spec_check) == 0) {
         message(paste0("Please select a compatible species: ", 
-                       paste(spec, collapse = ", ")))
+                    paste(spec, collapse = ", ")))
     }
     
     if(!is.null(library)) {
@@ -72,11 +74,12 @@ getGeneSets <- function(species = "Homo sapiens",
             tmp2 = msigdbr(species = spec_check, category = library[x])
             m_df <- rbind(m_df, tmp2)
         }
-        
-    }
-    if(!is.null(gene.sets)) {
+      
+        if(!is.null(gene.sets)) {
         m_df <- m_df[m_df$gs_name %in% gene.sets,]
+        }    
     }
+    
     gs <- unique(m_df$gs_name)
     ls <- list()
     for (i in seq_along(gs)) {
