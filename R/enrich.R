@@ -50,10 +50,10 @@ enrichIt <- function(obj, gene.sets = NULL, groups = 1000, cores = 2, assay = "R
 
     if (inherits(x = obj, what = "Seurat")) {
         if (slot == "counts") {
-            cnts <- obj@assays[[slot]]@counts
+            cnts <- obj@assays[[assay]]@counts
         }
         if (slot == "data"){
-            cnts <- obj@assays[[slot]]@data
+            cnts <- obj@assays[[assay]]@data
         }
         cnts<- cnts[tabulate(summary(cnts)$i) != 0, , drop = FALSE]
         cnts <- as.matrix(cnts)
